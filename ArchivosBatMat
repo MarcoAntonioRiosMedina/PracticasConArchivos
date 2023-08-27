@@ -1,0 +1,115 @@
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+public class ArchivosBatMat {
+
+    public static void main(String[] args) {
+
+        String inputAFile = "a.mat";
+        String inputBFile = "b.mat";
+        String outputCFile = "c.mat";
+
+        try {
+            FileInputStream inputA = new FileInputStream(inputAFile);
+            FileInputStream inputB = new FileInputStream(inputBFile);
+            FileOutputStream outputC = new FileOutputStream(outputCFile);
+
+            int rowsA = inputA.read();  // Lee renglones de la matriz A
+            int colsA = inputA.read();  // Lee columnas de la matriz A
+            int rowsB = inputB.read();  // Lee renglones de la matriz B
+            int colsB = inputB.read();  // Lee columnas de la matriz B
+
+            if (colsA != rowsB) {
+                System.out.println("No se puede realizar la multiplicación de matrices.");
+                return;
+            }
+
+
+            double[][] matrixA = leerMatriz(inputA, rowsA, colsA);
+            double[][] matrixB = leerMatriz(inputB, rowsB, colsB);
+            // Leer los datos de las matrices A y B
+
+
+            double[][] matrixC = multiplicarMatrices(matrixA, matrixB); // Calcular la matriz resultante C
+
+
+            outputC.write(rowsA);
+            outputC.write(colsB);
+            escribirMatriz(outputC, matrixC);
+
+            // Escribir la matriz resultante C en el archivo de salida
+
+            inputA.close();
+            inputB.close();
+            outputC.close();
+
+            System.out.println("Producto de matrices calculado y almacenado en el archvio c.mat.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static double[][] leerMatriz(FileInputStream input, int rows, int cols) throws IOException {
+        double[][] matriz = new double[rows][cols];
+
+        byte[] buffer = new byte[8];  // Double es de 8 bytes como lo visto en clase
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                input.read(buffer);
+                matriz[i][j] = bytesADouble(buffer);
+            }
+        }
+
+        return matriz;
+
+    }
+
+    private static double bytesADouble(byte[] bytes) {
+        long longBits = 0;
+        for (int i = 0; i < 8; i++) {
+            longBits |= ((long) bytes[i] & 0xFF) << (8 * i);
+        }
+        return Double.longBitsToDouble(longBits);
+    }
+
+    private static double[][] multiplicarMatrices(double[][] matrizA, double[][] matrizB) {
+
+        int rowsA = matrizA.length;
+        int colsA = matrizA[0].length;
+        int colsB = matrizB[0].length;
+
+        double[][] resultado = new double[rowsA][colsB];
+
+        for (int i = 0; i < rowsA; i++) {
+            for (int j = 0; j < colsB; j++) {
+                double sum = 0;
+                for (int k = 0; k < colsA; k++) {
+                    sum += matrizA[i][k] * matrizB[k][j];
+                }
+                resultado[i][j] = sum;
+            }
+        }
+        return resultado;
+    }
+
+    private static void escribirMatriz(FileOutputStream output, double[][] matrix) throws IOException {
+        byte[] buffer = new byte[8];
+
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[0].length; j++) {
+                doubleABytes(matrix[i][j], buffer);
+                output.write(buffer);
+            }
+        }
+    }
+
+    private static void doubleABytes(double value, byte[] bytes) {
+
+        long longBits = Double.doubleToLongBits(value);
+        for (int i = 0; i < 8; i++) {
+            bytes[i] = (byte) ((longBits >> (8 * i)) & 0xFF);
+        }
+    }
+}// end main
