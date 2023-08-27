@@ -1,0 +1,43 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+
+public class HistogramaUNI{
+
+    public static void main(String[] args) {
+
+        String archivo = "divina_comedia_sp.txt";// Ruta del archivo de texto (Debe estar el archivo en la raíz del proyecto)
+
+        HashMap<Integer, Integer> histograma = new HashMap<>(); // Almacena las longitudes de palabras y sus frecuencias
+
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String linea;
+
+
+            while ((linea = br.readLine()) != null) {
+                String[] palabras = linea.split("\\s+"); // Dividir en palabras
+                for (String palabra : palabras) {
+                    palabra = palabra.replaceAll("[^a-zA-Z]", ""); // Elimina los caracteres no alfabéticos del archivo
+                    int longitud = palabra.length();
+                    if (longitud >= 2 && longitud <= 10) {
+                        histograma.put(longitud, histograma.getOrDefault(longitud, 0) + longitud);
+
+                    }
+                }
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+
+        System.out.println("Longitud de las palabras:");  // Imprimir el histograma
+        for (int longitud = 2; longitud <= 10; longitud++) {
+
+            int cantidadCaracteres = histograma.getOrDefault(longitud, 0);
+            System.out.printf("%2d: %s%n", longitud, cantidadCaracteres);
+        }
+    }
+}// end main
